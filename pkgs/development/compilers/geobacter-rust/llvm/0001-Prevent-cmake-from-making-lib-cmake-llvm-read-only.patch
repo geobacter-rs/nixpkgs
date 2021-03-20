@@ -1,0 +1,37 @@
+From 0e2efc133b2c422ca660123b9540e09c3cf2410e Mon Sep 17 00:00:00 2001
+From: Richard Diamond <wichard@vitalitystudios.com>
+Date: Sat, 20 Mar 2021 16:19:37 -0700
+Subject: [PATCH] Prevent cmake from making `lib/cmake/llvm` read only.
+
+---
+ llvm/cmake/modules/CMakeLists.txt | 14 ++++++++------
+ 1 file changed, 8 insertions(+), 6 deletions(-)
+
+diff --git a/llvm/cmake/modules/CMakeLists.txt b/llvm/cmake/modules/CMakeLists.txt
+index 4b8879f65fe..edc4a5d695b 100644
+--- a/llvm/cmake/modules/CMakeLists.txt
++++ b/llvm/cmake/modules/CMakeLists.txt
+@@ -90,12 +90,14 @@ set(llvm_config_include_buildtree_only_exports)
+ # For compatibility with projects that include(LLVMConfig)
+ # via CMAKE_MODULE_PATH, place API modules next to it.
+ # This should be removed in the future.
+-file(COPY .
+-  DESTINATION ${llvm_cmake_builddir}
+-  FILES_MATCHING PATTERN *.cmake
+-  PATTERN .svn EXCLUDE
+-  PATTERN CMakeFiles EXCLUDE
+-  )
++# Nix PATCH: This causes `lib/cmake/llvm/` to be read only, causing cmake
++# failures we attempt to create other files later.
++#file(COPY .
++#  DESTINATION ${llvm_cmake_builddir}
++#  FILES_MATCHING PATTERN *.cmake
++#  PATTERN .svn EXCLUDE
++#  PATTERN CMakeFiles EXCLUDE
++#  )
+ 
+ # Generate LLVMConfig.cmake for the install tree.
+ set(LLVM_CONFIG_CODE "
+-- 
+2.27.0
+

@@ -2321,6 +2321,12 @@
     githubId = 265220;
     name = "David Leung";
   };
+  DiamondLovesYou = {
+    email = "dick@richardcdiamond.com";
+    github = "DiamondLovesYou";
+    githubId = 650357;
+    name = "Richard Diamond";
+  };
   DianaOlympos = {
     email = "DianaOlympos@noreply.github.com";
     github = "DianaOlympos";

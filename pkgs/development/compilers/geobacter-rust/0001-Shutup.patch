@@ -1,0 +1,25 @@
+From c904cce70d7c5fee692f956859bebff177f72e11 Mon Sep 17 00:00:00 2001
+From: Richard Diamond <wichard@vitalitystudios.com>
+Date: Sat, 20 Mar 2021 13:51:22 -0700
+Subject: [PATCH] Shutup!
+
+---
+ config.toml.example | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/config.toml.example b/config.toml.example
+index c5efb8ed5e5..2d5c025c0d1 100644
+--- a/config.toml.example
++++ b/config.toml.example
+@@ -13,7 +13,7 @@
+ # If it does not match the version that is currently running,
+ # `x.py` will prompt you to update it and read the changelog.
+ # See `src/bootstrap/CHANGELOG.md` for more information.
+-changelog-seen = 1
++changelog-seen = 2
+ 
+ # =============================================================================
+ # Global Settings
+-- 
+2.27.0
+

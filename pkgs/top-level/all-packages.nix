@@ -10919,6 +10919,22 @@ in
   };
   rust = rust_1_49;
 
+  geobacterLlvmPackages_latest = callPackage ../development/compilers/geobacter-rust/llvm ({
+    inherit (stdenvAdapters) overrideCC;
+    buildLlvmTools = buildPackages.llvmPackages_11.tools;
+    targetLlvmLibraries = targetPackages.llvmPackages_11.libraries;
+  } // lib.optionalAttrs (stdenv.hostPlatform.isi686 && buildPackages.stdenv.cc.isGNU) {
+    stdenv = gcc7Stdenv;
+  });
+  geobacterLlvm_latest = geobacterLlvmPackages_latest.llvm;
+  geobacterRust_1_49 = callPackage ../development/compilers/geobacter-rust/latest.nix {
+    inherit (darwin.apple_sdk.frameworks) CoreFoundation Security;
+  };
+  geobacterRust = geobacterRust_1_49;
+  geobacterRustPackages = geobacterRust_1_49.packages.stable;
+  geobacterRustPlatform = geobacterRustPackages.rustPlatform;
+  makeGeobacterRustPlatform = callPackage ../development/compilers/geobacter-rust/make-rust-platform.nix {};
+
   rustPackages_1_45 = rust_1_45.packages.stable;
   rustPackages_1_49 = rust_1_49.packages.stable;
   rustPackages = rustPackages_1_49;
