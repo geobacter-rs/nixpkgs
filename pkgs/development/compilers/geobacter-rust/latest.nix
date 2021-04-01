@@ -9,15 +9,15 @@
 
 let
   llvmAttrs = {
-    enableSharedLibraries = true;
+    enableSharedLibraries = false;
     enablePolly = true;
-    buildType = "RelWithDebInfo";
+    buildType = "Release";
     enableAssertions = true;
   };
 in import ./default.nix {
   rustcVersion = "1.49.0";
   rustcRev = "542f72c09948fd6afd7a67924dcab96ac3bccac9";
-  rustcSha256 = "09ph0x3rsgh5ym61mldk3pcvz9700bzp2ynqn7fps84rp2k85359";
+  rustcSha256 = "1zcld6z77r1l46xcdkzciv5nim0hm2g3a1lpfr0farjh5r1g9vpd";
   rustcVendorSha256 = "1yxddw91gaz50qrnf1mngr3k7f0gkyxkw0w44mz6n9rsi98kfcdv";
   # Not sure why these are different, since we vender the whole workspace.
   cargoVendorSha256 = "1r13afsqddx40xqz1figi0353zgy909ql5i76446ng70va3xwc22";

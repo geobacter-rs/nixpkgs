@@ -10,6 +10,7 @@
 , version
 , release_version
 , zlib
+, git
 , buildPackages
 , buildType ? "Release"
 , enableAssertions ? false
@@ -40,16 +41,19 @@ in stdenv.mkDerivation (rec {
     repo = "llvm-project";
     rev = "fb3b1384abb026f49b08caa823ea0f15e6f5721e";
     fetchSubmodules = true;
-    sha256 = "1x0mlinj1xi3bf8pyv8kgabwzbp7pqcy4asii76jrw81kgw21kih";
+    sha256 = "0mn4nsp72asii5j34ccxc34c9rx0bkx7wqzqrw1z4kgasswx3s2x";
+    leaveDotGit = true;
+    deepClone = false;
   };
   polly_src = "${src}/polly";
 
   dontUseCmakeBuildDir = true;
+  dontStrip = (buildType == "Debug" || buildType == "RelWithDebInfo");
 
   outputs = [ "out" "python" ]
     ++ optional enableSharedLibraries "lib";
 
-  nativeBuildInputs = [ cmake python3 ninja ]
+  nativeBuildInputs = [ cmake python3 ninja git ]
     ++ optionals enableManpages [ python3.pkgs.sphinx python3.pkgs.recommonmark ];
 
   buildInputs = [ libxml2 libffi ]
@@ -121,6 +125,8 @@ in stdenv.mkDerivation (rec {
     "-DLLVM_ENABLE_ASSERTIONS=${if enableAssertions then "ON" else  "OFF" }"
   ] ++ optionals enableSharedLibraries [
     "-DLLVM_LINK_LLVM_DYLIB=ON"
+  ] ++ optionals enablePolly [
+    "-DLLVM_ENABLE_PROJECTS=polly"
   ] ++ optionals enableManpages [
     "-DLLVM_BUILD_DOCS=ON"
     "-DLLVM_ENABLE_SPHINX=ON"

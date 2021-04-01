@@ -110,6 +110,7 @@
         rustPlatform = bootRustPlatform;
         inherit CoreFoundation Security;
         vendorSha256 = cargoVendorSha256;
+        dontAddGeobacterRustFlags = true;
       };
       # Probably won't compile anyway. TODO maybe fix?
       #clippy = self.callPackage ./clippy.nix { inherit Security; };

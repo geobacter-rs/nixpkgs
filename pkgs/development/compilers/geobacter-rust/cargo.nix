@@ -2,6 +2,7 @@
 , installShellFiles, makeWrapper, libiconv, cacert, rustPlatform, rustc
 , CoreFoundation, Security
 , vendorSha256
+, dontAddGeobacterRustFlags ? false
 }:
 
 rustPlatform.buildRustPackage {
@@ -18,6 +19,8 @@ rustPlatform.buildRustPackage {
 
   # changes hash of vendor directory otherwise
   dontUpdateAutotoolsGnuConfigScripts = true;
+
+  inherit dontAddGeobacterRustFlags;
 
   nativeBuildInputs = [ pkg-config cmake installShellFiles makeWrapper ];
   buildInputs = [ cacert file curl python3 openssl zlib ]

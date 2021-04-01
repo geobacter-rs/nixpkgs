@@ -1,6 +1,6 @@
 { lib, stdenv, removeReferencesTo, pkgsBuildBuild, pkgsBuildHost, pkgsBuildTarget
 , llvmShared, llvmSharedForBuild, llvmSharedForHost, llvmSharedForTarget
-, fetchFromGitHub, file, python3
+, fetchFromGitHub, file, python3, git
 , darwin, cmake, geobacterRust, rustPlatform
 , pkg-config, openssl, ninja
 , which, libffi
@@ -25,6 +25,8 @@ in stdenv.mkDerivation rec {
     repo = "rust";
     fetchSubmodules = true;
     inherit rev sha256;
+    leaveDotGit = true;
+    deepClone = false;
   };
   cargoDeps = rustPlatform.fetchCargoTarball {
     inherit src;
@@ -48,7 +50,7 @@ in stdenv.mkDerivation rec {
   #
   # Running `strip -S` when cross compiling can harm the cross rlibs.
   # See: https://github.com/NixOS/nixpkgs/pull/56540#issuecomment-471624656
-  stripDebugList = [ "bin" ];
+  # stripDebugList = [ "bin" ];
 
   NIX_LDFLAGS = toString (
        # when linking stage1 libstd: cc: undefined reference to `__cxa_begin_catch'
@@ -56,10 +58,10 @@ in stdenv.mkDerivation rec {
     ++ optional (stdenv.isDarwin && !withBundledLLVM) "-lc++"
     ++ optional stdenv.isDarwin "-rpath ${llvmSharedForHost}/lib");
 
-  RUSTFLAGS_NOT_BOOTSTRAP = "-Z always-encode-mir -Z always-emit-metadata";
+  dontAddGeobacterRustFlags = true;
+  RUSTFLAGS_NOT_BOOTSTRAP="-Z always-encode-mir -Z always-emit-metadata";
   # Increase codegen units to introduce parallelism within the compiler.
   RUSTFLAGS = "-Ccodegen-units=10";
-  RUSTC_VERBOSE = 2;
 
   # We need rust to build rust. If we don't provide it, configure will try to download it.
   # Reference: https://github.com/rust-lang/rust/blob/master/src/bootstrap/configure.py
@@ -84,6 +86,8 @@ in stdenv.mkDerivation rec {
     "--set=build.cargo=${rustPlatform.rust.cargo}/bin/cargo"
     # Is rustfmt really needed??
     "--set=build.rustfmt=${rustPlatform.rust.rustfmt}/bin/rustfmt"
+    # So hashes are stable
+    "--set=rust.remap-debuginfo=true"
     "--enable-rpath"
     "--enable-vendor"
     "--build=${geobacterRust.toRustTargetSpec stdenv.buildPlatform}"
@@ -109,7 +113,8 @@ in stdenv.mkDerivation rec {
     "${setHost}.cxx=${cxxForHost}"
     "${setTarget}.cxx=${cxxForTarget}"
   ] ++ optionals (!withBundledLLVM) [
-    "--enable-llvm-link-shared"
+    # TODO Shared LLVM segfaults? Disabling til that is solved.
+    # "--enable-llvm-link-shared"
     "${setBuild}.llvm-config=${llvmSharedForBuild}/bin/llvm-config"
     "${setHost}.llvm-config=${llvmSharedForHost}/bin/llvm-config"
     "${setTarget}.llvm-config=${llvmSharedForTarget}/bin/llvm-config"
@@ -139,7 +144,8 @@ in stdenv.mkDerivation rec {
   postPatch = ''
     patchShebangs src/etc configure
 
-    ${optionalString (!withBundledLLVM) "rm -rf src/llvm-project"}
+    # Rust needs llvm-project/libunwind w/ static LLVM
+    # ${optionalString (!withBundledLLVM) "rm -rf src/llvm-project"}
 
     # Fix the configure script to not require curl as we won't use it
     sed -i configure \
@@ -147,15 +153,7 @@ in stdenv.mkDerivation rec {
 
     # Useful debugging parameter
     export VERBOSE=2;
-    export RUSTFLAGS_NOT_BOOTSTRAP="-Z always-encode-mir -Z always-emit-metadata";
-    # Increase codegen units to introduce parallelism within the compiler.
-    export RUSTFLAGS="-Ccodegen-units=10";
-    export RUSTC_VERBOSE=2;
   '';
-
-  #buildPhase = ''
-  #  python ./x.py --stage 2 dist --config config.toml
-  #'';
 
   # rustc unfortunately needs cmake to compile llvm-rt but doesn't
   # use it for the normal build. This disables cmake in Nix.
@@ -166,11 +164,13 @@ in stdenv.mkDerivation rec {
   nativeBuildInputs = [
     file python3 rustPlatform.rust.rustc cmake
     which libffi removeReferencesTo pkg-config
+    git
   ];
 
   buildInputs = [ openssl ]
     ++ optional stdenv.isDarwin Security
-    ++ optional (!withBundledLLVM) llvmShared;
+    ++ optional (!withBundledLLVM) llvmShared
+    ++ llvmShared.buildInputs;
 
   outputs = [ "out" "man" "doc" ];
   setOutputFlags = false;
