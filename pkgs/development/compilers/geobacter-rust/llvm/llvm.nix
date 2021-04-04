@@ -39,9 +39,9 @@ in stdenv.mkDerivation (rec {
   src = fetchFromGitHub {
     owner = "geobacter-rs";
     repo = "llvm-project";
-    rev = "fb3b1384abb026f49b08caa823ea0f15e6f5721e";
+    rev = "d71a532c6eb3513b5eace11fef55e09489821e40";
     fetchSubmodules = true;
-    sha256 = "0mn4nsp72asii5j34ccxc34c9rx0bkx7wqzqrw1z4kgasswx3s2x";
+    sha256 = "1p2p22fz2168diiv037979585yxqs9flkvb1f5vr1fn7ff5cj688";
     leaveDotGit = true;
     deepClone = false;
   };
